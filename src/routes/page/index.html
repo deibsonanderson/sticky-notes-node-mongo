@@ -363,22 +363,24 @@
 			}
 
 			function remove(codeBox){
-				$.ajax({
-					url: path+'/note/'+codeBox,
-					type: 'DELETE',
-					headers: {
-						"x-access-token":token
-					},			
-					success: function(result) {
-						$("#box-"+codeBox).remove();
-						token = result.token;
-					},
-					beforeSend: function() {},
-					complete: function() {},
-					error: function(result){
-						checkTokenError(result);
-					}
-				});	
+				if (confirm("Are you sure you want to delete sticky notes?") == true) {
+					$.ajax({
+						url: path+'/note/'+codeBox,
+						type: 'DELETE',
+						headers: {
+							"x-access-token":token
+						},			
+						success: function(result) {
+							$("#box-"+codeBox).remove();
+							token = result.token;
+						},
+						beforeSend: function() {},
+						complete: function() {},
+						error: function(result){
+							checkTokenError(result);
+						}
+					});	
+				}
 			}
 
 			function focusBox(codeBox){
