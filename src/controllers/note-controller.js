@@ -11,7 +11,7 @@ exports.find = async(req, res, next) => {
         res.status(200).send(data);
     } catch (e) {
         res.status(500).send({
-            message: 'Failed to process your request of note'
+            message: 'Failed to process of find your request of note'
         });
     }
 }
@@ -25,7 +25,7 @@ exports.create = async(req, res, next) => {
         });
     } catch (e) {
         res.status(500).send({
-            message: 'Failed to process your request of note'
+            message: 'Failed to process of create your request of note'
         });
     }
 };
@@ -39,7 +39,7 @@ exports.update = async(req, res, next) => {
         });
     } catch (e) {
         res.status(500).send({
-            message: 'Failed to process your request of note'
+            message: 'Failed to process of update your request of note'
         });
     }
 };
@@ -53,7 +53,7 @@ exports.remove = async(req, res, next) => {
         });
     } catch (e) {
         res.status(500).send({
-            message: 'Failed to process your request of note'
+            message: 'Failed to process of remove your request of note'
         });
     }
 };

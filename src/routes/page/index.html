@@ -352,13 +352,13 @@
 			}
 
 			function mountMessageError(result){
-				if(result.responseJSON !== undefined && result.responseJSON.message != undefined && 
+				if(result.responseJSON !== undefined && result.responseJSON.message !== undefined && 
 				result.responseJSON.message.name != undefined){
 					return 'ERROR: '+result.responseJSON.message.name+', DESCRIPTION: '+result.responseJSON.message.message;
-				}else if(result.responseJSON !== undefined && result.responseJSON.message != undefined){
+				}else if(result.responseJSON !== undefined && result.responseJSON.message !== undefined){
 					return 'ERROR: '+result.responseJSON.message;
 				}else{
-					return 'ERROR: internal sever error!';
+					return 'ERROR: internal sever error!, DESCRIPTION: '+result.responseJSON;
 				}				
 			}
 

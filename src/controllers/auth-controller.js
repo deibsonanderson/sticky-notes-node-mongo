@@ -34,7 +34,7 @@ exports.login = async(req, res, next) => {
         });
     } catch (e) {
         res.status(500).send({
-            message: 'Failed to process your request of auth'
+            message: 'Failed to process of login your request of auth'
         });
     }
 };
@@ -69,7 +69,7 @@ exports.refreshLogin = async(req, res, next) => {
         });
     } catch (e) {
         res.status(500).send({
-            message: 'Failed to process your request of auth'
+            message: 'Failed to process of refreshLogin your request of auth'
         });
     }
 };

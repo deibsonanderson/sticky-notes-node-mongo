@@ -2,7 +2,7 @@
 const jwt = require('jsonwebtoken');
 
 exports.generateToken = async (data) => {
-    return jwt.sign(data, global.PRIVATE_KEY, { expiresIn: '1d' });
+    return jwt.sign(data, global.PRIVATE_KEY, { expiresIn: '8h' });
 }
 
 exports.decodeToken = async (token) => {
