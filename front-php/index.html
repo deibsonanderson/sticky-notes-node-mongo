@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jQuery UI Draggable - Default functionality</title>
+<link rel="stylesheet" href="jquery-ui.css">
+<style>
+.box {
+	width: 200px;
+	height: 200px;
+	padding: 0.5em;
+    top: 10px; 
+    left: 10px; 
+}
+
+.area {
+	width: 194px;
+	height: 172px;
+	border: none;
+}
+
+.containment-wrapper {
+	width: 1024px;
+	height: 768px;
+	border-style: inset;
+}
+
+.box h3 {
+	text-align: center;
+	margin: 0;
+}
+
+body {
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+table {
+	font-size: 1em;
+}
+
+.ui-draggable, .ui-droppable {
+	background-position: top;
+}
+</style>
+<script src="jquery-1.12.4.js"></script>
+<script src="jquery-ui.js"></script>
+<script src="jquery.ui.touch-punch.js"></script>
+<script>
+	
+	var token = "";
+	var path = "https://sticky-notes-node-mongo.herokuapp.com/note"
+
+	$(function() {
+		token = prompt("https://sticky-notes-node-mongo.herokuapp.com/swagger-ui", "");
+		if (token == null || token == "") {
+		  location.reload();
+		}; 
+		getNotes();
+	});
+	
+	function getCode(){
+		return new Date().getTime();
+	}
+	
+	function getRandomColor() {
+	  var letters = '0123456789ABCDEF';
+	  var color = '#';
+	  for (var i = 0; i < 6; i++) {
+		color += letters[Math.floor(Math.random() * 16)];
+	  }
+	  return color;
+	}
+	
+	function getNotes(){
+		$.ajax({
+			url: path,
+			type: 'GET',
+			headers: {
+				"x-access-token":token
+			},			
+			success: function(result) {
+				if(result != undefined && result.length > 0){
+					for(var i=0; i < result.length; i++){
+						mountNotes(result[i].code,result[i].title, result[i].description,result[i].width, result[i].height, result[i].top, result[i].left, '#'+result[i].color);
+					}
+				}
+			},
+			beforeSend: function() {},
+			complete: function() {}
+		});
+	}
+	
+	function mountNotes(codeBox, title, description, width, height, top, left, color){
+		
+		$('body').append('<div id="box-'+codeBox+'" class="ui-widget-content box" style="cursor: pointer; position: absolute;"><h3 class="ui-widget-header"><input id="text-'+codeBox+'" type="text" value="'+title+'" class="ui-widget-header" style="border: none; text-align: center;" onkeyup="this.value=this.value.toUpperCase();" onblur="update('+codeBox+', $(\'#box-'+codeBox+'\'));" />&nbsp;<span onclick="remove('+codeBox+')">X</span>&nbsp;</h3><textarea id="area-'+codeBox+'" class="area" style="resize: none" onblur="update('+codeBox+', $(\'#box-'+codeBox+'\'));">'+description+'</textarea></div>');
+
+		$("#box-"+codeBox).css("width",width);
+        $("#box-"+codeBox).css("height",height);
+		$("#box-"+codeBox).css("top",top);
+        $("#box-"+codeBox).css("left",left);
+		$("#box-"+codeBox).css("background-color", color);	
+		$("#area-"+codeBox).css("background-color", color);	
+		$("#area-"+codeBox).css("width", (width - 6));
+		$("#area-"+codeBox).css("height", (height - 28));
+		$("#text-"+codeBox).css("width", (width - 23));
+		
+		mountResizable(codeBox);
+
+		mountDraggable(codeBox);
+		
+	}
+	
+	function mountResizable(codeBox){
+			$("#box-"+codeBox).resizable({
+			maxHeight : 1000,
+			maxWidth : 1000,
+			minHeight : 200,
+			minWidth : 200,
+			resize : function() {
+				var x = $(this).position();
+				var width = $(this).width();
+				var height = $(this).height();
+				$("#area-"+codeBox).css("width", (width - 6));
+				$("#area-"+codeBox).css("height", (height - 28));
+				$("#text-"+codeBox).css("width", (width - 23));
+			},
+			stop : function() {
+				update(codeBox, this);
+			}			
+		});
+	}
+	
+	function mountDraggable(codeBox){
+		$("#box-"+codeBox).draggable({
+			start : function() {
+				// quando clicado
+			},
+			drag : function() {
+				// quando arrastado
+			},
+			stop : function() {
+				update(codeBox, this);
+			}
+		});
+	}
+	
+	var hexDigits = new Array
+		("0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"); 
+
+	//Function to convert rgb color to hex format
+	function rgb2hex(rgb) {
+		rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+		return "" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
+	}
+
+	function hex(x) {
+		return isNaN(x) ? "00" : hexDigits[(x - x % 16) / 16] + hexDigits[x % 16];
+	}
+	
+	function update(codeBox, element){
+	    var position = $(element).position();
+		var color = $(element).css("background-color");
+		$.ajax({
+			url: path+'/'+codeBox,
+			type: 'PUT',
+			data: {
+			  code: codeBox,
+			  title: $("#text-"+codeBox).val(),
+			  color: rgb2hex(color),
+			  description: $("#area-"+codeBox).val(),
+			  user: 1,
+			  top: parseInt(position.top),
+			  left: parseInt(position.left),
+			  width: parseInt($(element).width()),
+			  height: parseInt($(element).height())
+			},
+			headers: {
+				"x-access-token":token
+			},			
+			success: function(result) {},
+			beforeSend: function() {},
+			complete: function() {}
+		});	
+	}
+	
+	function remove(codeBox){
+		$.ajax({
+			url: path+'/'+codeBox,
+			type: 'DELETE',
+			headers: {
+				"x-access-token":token
+			},			
+			success: function(result) {
+				$("#box-"+codeBox).remove();
+			},
+			beforeSend: function() {},
+			complete: function() {}
+		});	
+	}
+	
+	function create(codeBox){
+		
+		$('body').append('<div id="box-'+codeBox+'" class="ui-widget-content box" style="cursor: pointer; position: absolute;"><h3 class="ui-widget-header"><input id="text-'+codeBox+'" type="text" value="TITLE" class="ui-widget-header" style="border: none; text-align: center;" onkeyup="this.value=this.value.toUpperCase();" onblur="update('+codeBox+', $(\'#box-'+codeBox+'\'));"/>&nbsp;<span onclick="remove('+codeBox+')">X</span>&nbsp;</h3><textarea id="area-'+codeBox+'" class="area" style="resize: none" onblur="update('+codeBox+', $(\'#box-'+codeBox+'\'));"></textarea></div>');
+		
+		mountResizable(codeBox);
+
+		mountDraggable(codeBox);
+
+        $("#box-"+codeBox).css("top",40);
+        $("#box-"+codeBox).css("left",40);
+		var color = getRandomColor();
+        $("#box-"+codeBox).css("background-color", color);	
+		$("#area-"+codeBox).css("background-color", color);	
+		
+		$.ajax({
+			url: path,
+			type: 'POST',
+			data: {
+			  code: codeBox,
+			  title: "TITLE",
+			  color: color.replace("#", ""),
+			  description: "",
+			  user: 1,
+			  top: 40,
+			  left: 40,
+			  width: 200,
+			  height: 200
+			},
+			headers: {
+				"x-access-token":token
+			},			
+			success: function(result) {},
+			beforeSend: function() {},
+			complete: function() {}
+		});
+	}
+</script>
+</head>
+<body>
+	<input type="button" value="Novo" onclick="create(getCode());"/>
+</body>
+</html>
